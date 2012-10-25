@@ -18,6 +18,16 @@ class TreapNode:
 		else:
 			return False
 
+	def setLeftChild(self, node):
+		self.leftChild = node
+		if (node != None):
+			node.father = self
+
+	def setRightChild(self, node):
+		self.rightChild = node
+		if (node != None):
+			node.father = self
+
 	def successor(self):
 		if (currentNode.rightChild == None):
 			return None

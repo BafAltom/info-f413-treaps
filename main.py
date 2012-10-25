@@ -3,13 +3,13 @@ import random
 from TreapNode import *
 from Treap import *
 
-myRoot = TreapNode(random.random(), 500)
-t = Treap(myRoot)
+t = Treap(None)
 
 elements_in_treap = []
 for i in range(10):
+	print ""
 	prob = random.random()
-	if (prob < 0.5 or len(elements_in_treap) == 0):
+	if (prob < 0.75 or len(elements_in_treap) == 0):
 		value = random.random()
 		elements_in_treap.append(value)
 		print "add", value
@@ -24,4 +24,5 @@ for i in range(10):
 	print "theorical size", len(elements_in_treap)
 	print "returned size", t.size()
 	assert(len(elements_in_treap) == t.size())
+	assert(t.root == None or t.root.father == None)
 print "fini"

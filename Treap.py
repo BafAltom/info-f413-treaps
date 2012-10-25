@@ -7,6 +7,9 @@ class Treap:
 
 	# Interface
 
+	def __str__(self):
+		return str(self.root)
+
 	def size(self):
 		if (self.root == None):
 			return 0
@@ -28,33 +31,42 @@ class Treap:
 			node = TreapNode(node, None)
 		node.priority = self.newPriority()
 		self.add_bst(node)
+		print "temp tree after add_bst", str(self)
 		while(node != self.root and node.priority > node.father.priority):
-			if (node.isLeftChild):
+			if (node.isLeftChild()):
+				print "one rightrot"
 				self.rightRot(node)
-			else:
+			elif(node.isRightChild()):
+				print "one leftrot"
 				self.leftRot(node)
+			else:
+				raise("This should not happen")
 
 	def delNode(self, node): # node can be an actual node or a value
 		if (type(node) != TreapNode):
 			node = self.search(node)
 		if (node == None):
-			return False
+			raise "delNode: value", str(node), "was not found in Treap"
 		else:
 			f = node.father
 			if (node.leftChild == None):
 				if (f == None): # node was root
 					self.root = node.rightChild
-				elif (node.isLeftChild):
+				elif (node.isLeftChild()):
 					f.leftChild = node.rightChild
 				else:
 					f.rightChild = node.rightChild
+				if (node.rightChild != None):
+					node.rightChild.father = f
 			elif (node.rightChild == None):
 				if (f == None): # node was root
-					self.Root = node.leftChild
-				if (node.isLeftChild):
+					self.root = node.leftChild
+				elif (node.isLeftChild()):
 					f.leftChild = node.leftChild
 				else:
 					f.rightChild = node.leftChild
+				if (node.leftChild != None):
+					node.leftChild.father = f
 			else:
 				# we can replace node with either its predecessor or its successor
 				# Wikipedia says we should randomly choose between the two for best efficiency
@@ -91,7 +103,6 @@ class Treap:
 				raise("Added value already present in the BST")
 
 		if (currentNode == None):
-			print "ROOT WAS NONE"
 			self.root = node
 		elif (currentNode.label > node.label):
 			currentNode.leftChild = node
@@ -99,55 +110,53 @@ class Treap:
 			currentNode.rightChild = node
 		node.father = currentNode
 
-	def leftRot(self, c):
+	# TREE ROTATIONS
+	# Also known as : implementation hell
+	# Notations come from : http://en.wikipedia.org/wiki/Tree_rotation
 
-		# define notation
-		b = c.father
-		bFather = b.father
-		sub1 = b.leftChild
-		sub2 = c.leftChild
-		sub3 = c.rightChild
+	def leftRot(self, Q):
+		assert(Q.isRightChild())
 
-		#make rotation
-		if (self.root == b):
-			bFather = None
-			self.root = c
-		elif(b.isLeftChild()):
-			bFather.leftChild = c
+		# notations
+		P = Q.father
+		A = P.leftChild
+		B = Q.leftChild
+		C = Q.rightChild
+		Pf = P.father
+
+		#rotation
+		if (Pf != None):
+			if (P.isLeftChild()):
+				Pf.setLeftChild(Q)
+			else:
+				Pf.setRightChild(Q)
 		else:
-			bFather.rightChild = c
-		c.father = bFather
-		c.leftChild = b
-		b.father = c
-		c.rightChild = sub3
-		if (sub3 != None): sub3.father = c
-		b.leftChild = sub1
-		if (sub1 != None): sub1.father = b
-		b.rightChild = sub2
-		if (sub2 != None): sub2.father = b
+			self.root = Q
+		Q.setLeftChild(P)
+		P.setLeftChild(A)
+		P.setRightChild(B)
+		Q.setRightChild(C)
 
-	def rightRot(self, b):
-		# define notation
-		c = b.father
-		cFather = c.father
-		sub1 = b.leftChild
-		sub2 = b.rightChild
-		sub3 = c.rightChild
+	def rightRot(self, P):
+		assert(P.isLeftChild())
 
-		#make rotation
-		if (self.root == c):
-			cFather = None
-			self.root = b
-		elif (c.isLeftChild()):
-			cFather.leftChild = b
+		#notations
+		Q = P.father
+		A = P.leftChild
+		B = P.rightChild
+		C = Q.rightChild
+		Qf = Q.father
+
+		#rotation
+		if (Qf != None):
+			if (Q.isLeftChild()):
+				Qf.setLeftChild(P)
+			else:
+				Qf.setRightChild(P)
 		else:
-			cFather.rightChild = b
-		b.father = cFather
-		b.rightChild = c
-		c.father = b
-		b.leftChild = sub1
-		if (sub1 != None): sub1.father = b
-		b.rightChild = sub2
-		if (sub2 != None): sub2.father = b
-		c.rightChild = sub3
-		if (sub3 != None): sub3.father = c
+			self.root = P
+
+		P.setRightChild(Q)
+		P.setLeftChild(A)
+		Q.setLeftChild(B)
+		Q.setRightChild(C)
