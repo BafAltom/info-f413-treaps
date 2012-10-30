@@ -29,7 +29,7 @@ class TreapNode:
 			node.father = self
 
 	def successor(self):
-		if (currentNode.rightChild == None):
+		if (self.rightChild == None):
 			return None
 		else:
 			currentNode = self.rightChild
@@ -37,8 +37,11 @@ class TreapNode:
 				currentNode = currentNode.leftChild
 			return currentNode
 
+	def softReplace(self, node2): # dirty trick
+		self.label = node2.label
+
 	def predecessor(self):
-		if (currentNode.leftChild == None):
+		if (self.leftChild == None):
 			return None
 		else:
 			currentNode = self.leftChild

@@ -2,6 +2,7 @@ from TreapNode import *
 import random
 
 class Treap:
+	MAX_PRIORITY = 200
 	def __init__(self, root):
 		self.root = root
 
@@ -27,26 +28,30 @@ class Treap:
 		return currentN
 
 	def addNode(self, node): # node can be an actual node or a value
-		if (type(node) != TreapNode):
+		if (not isinstance(node, TreapNode)):
 			node = TreapNode(node, None)
 		node.priority = self.newPriority()
+		while(self.isPriorityInTree(node.priority)):
+			node.priority = (node.priority + 1)%(self.MAX_PRIORITY + 1)
 		self.add_bst(node)
-		print "temp tree after add_bst", str(self)
-		while(node != self.root and node.priority > node.father.priority):
+		while(node != self.root and node.priority >= node.father.priority):
+			if (node.priority == node.father.priority):
+				raise Exception("Priority", node.priority, "already exists in the tree!")
 			if (node.isLeftChild()):
-				print "one rightrot"
 				self.rightRot(node)
 			elif(node.isRightChild()):
-				print "one leftrot"
 				self.leftRot(node)
 			else:
-				raise("This should not happen")
+				raise Exception("This should not happen")
 
 	def delNode(self, node): # node can be an actual node or a value
-		if (type(node) != TreapNode):
-			node = self.search(node)
+		if (not isinstance(node, TreapNode)):
+			value = node
+			node = self.search(value)
+		else:
+			value = node.label
 		if (node == None):
-			raise "delNode: value", str(node), "was not found in Treap"
+			raise Exception("delNode: value " + str(value) + " was not found in Treap")
 		else:
 			f = node.father
 			if (node.leftChild == None):
@@ -79,16 +84,25 @@ class Treap:
 				# If we just switch the nodes (normal BST behavior), the heap set of rules will be violated (priority < father.priority)
 				# We fix that problem by just switching the label...
 				# Better (?) solution would be to push down the replacement by rotations
-				node.softReplace(replacementNode) # (see note above)
 				self.delNode(replacementNode)
+				node.softReplace(replacementNode) # (see note above)
 
 	# Implementation
 
 	def newPriority(self):
-		return random.randint(0,10000)
+		return random.randint(0,self.MAX_PRIORITY)
 
-	def softReplace(self, node2): # dirty trick
-		node.label = node2.label
+	def isPriorityInTree(self, prio):
+		return self.isPriorityUnderNode(prio, self.root)
+
+	def isPriorityUnderNode(self, prio, node):
+		if (node == None):
+			return False
+		localVerif = (node.priority == prio)
+		if (node.priority > prio):
+			localVerif = (localVerif or self.isPriorityUnderNode(prio, node.leftChild))
+			localVerif = (localVerif or self.isPriorityUnderNode(prio, node.rightChild))
+		return localVerif
 
 	def add_bst(self, node):
 		currentNode = self.root
@@ -100,7 +114,7 @@ class Treap:
 			elif (currentNode.label < node.label):
 				nextNode = currentNode.rightChild
 			else:
-				raise("Added value already present in the BST")
+				raise Exception("Added value already present in the BST")
 
 		if (currentNode == None):
 			self.root = node
@@ -132,6 +146,7 @@ class Treap:
 				Pf.setRightChild(Q)
 		else:
 			self.root = Q
+		Q.father = Pf
 		Q.setLeftChild(P)
 		P.setLeftChild(A)
 		P.setRightChild(B)
@@ -155,7 +170,7 @@ class Treap:
 				Qf.setRightChild(P)
 		else:
 			self.root = P
-
+		P.father = Qf
 		P.setRightChild(Q)
 		P.setLeftChild(A)
 		Q.setLeftChild(B)
