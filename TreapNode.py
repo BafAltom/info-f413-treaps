@@ -50,12 +50,38 @@ class TreapNode:
 			return currentNode
 
 	def size(self):
-		size = 1
+		size = 0
 		if (self.leftChild != None):
 			size += self.leftChild.size()
 		if (self.rightChild != None):
 			size += self.rightChild.size()
-		return size
+		return (1 + size)
+
+	def height(self):
+		lh, rh = 0, 0
+		if (self.leftChild != None):
+			lh = self.leftChild.height()
+		if (self.rightChild != None):
+			rh = self.rightChild.height()
+		return (1 + max(lh, rh))
+
+	def checkBSTProperty(self):
+		leftProp = (self.leftChild == None or self.leftChild.label < self.label)
+		rightProp = (self.rightChild == None or self.rightChild.label > self.label)
+		return (leftProp and rightProp)
+
+	def checkHeapProperty(self):
+		leftProp = (self.leftChild == None or self.leftChild.priority < self.priority)
+		rightProp = (self.rightChild == None or self.rightChild.priority < self.priority)
+		return (leftProp and rightProp)
+
+	def assertProperties(self, recursive):
+		assert self.checkBSTProperty(), self
+		assert self.checkHeapProperty(), self
+		if (recursive):
+			if (self.leftChild != None): self.leftChild.assertProperties(recursive)
+			if (self.rightChild != None): self.rightChild.assertProperties(recursive)
+		return True
 
 	def __str__(self):
 		string = ""

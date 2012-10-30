@@ -2,7 +2,7 @@ from TreapNode import *
 import random
 
 class Treap:
-	MAX_PRIORITY = 200
+	MAX_PRIORITY = 10000
 	def __init__(self, root):
 		self.root = root
 
@@ -17,15 +17,28 @@ class Treap:
 		else:
 			return self.root.size()
 
+	def height(self):
+		if (self.root == None):
+			return 0
+		else:
+			return self.root.height()
+
+	def checkRep(self):
+		if (self.root == None):
+			return True
+		return self.root.assertProperties(True)
+
 	def search(self, value):
 		# Usual BST search
 		currentN = self.root
+		count = 1
 		while (currentN != None and currentN.label != value):
+			count += 1
 			if (currentN.label > value):
 				currentN = currentN.leftChild
 			else:
 				currentN = currentN.rightChild
-		return currentN
+		return currentN, count
 
 	def addNode(self, node): # node can be an actual node or a value
 		if (not isinstance(node, TreapNode)):
@@ -36,7 +49,7 @@ class Treap:
 		self.add_bst(node)
 		while(node != self.root and node.priority >= node.father.priority):
 			if (node.priority == node.father.priority):
-				raise Exception("Priority", node.priority, "already exists in the tree!")
+				raise Exception("Priority", node.priority, "already exists in the tree!" + str(self))
 			if (node.isLeftChild()):
 				self.rightRot(node)
 			elif(node.isRightChild()):
@@ -47,7 +60,7 @@ class Treap:
 	def delNode(self, node): # node can be an actual node or a value
 		if (not isinstance(node, TreapNode)):
 			value = node
-			node = self.search(value)
+			node, _ = self.search(value)
 		else:
 			value = node.label
 		if (node == None):
